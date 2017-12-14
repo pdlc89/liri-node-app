@@ -1,25 +1,41 @@
 var input = process.argv
 
-var Twitter = require("twitter");
+var user = input[2];
+
 var holder = require("./keys.js");
-var client = new Twitter(
-  holder.twitterKeys
-);
 
-// var client = new Twitter({
-//   consumer_key: 'CCaYJW2gWNx38LQ10YbT4YRI2',
-//   consumer_secret: 'gshx9MtCEHrVcgdJcO21tOEENm1YXZPG5MBlTY3v55xEZYdrm5',
-//   access_token_key: '937476818768076800-Imf2Svv2ZJjdKysPUJCT0ztWhTURjur',
-//   access_token_secret: 'WJLgBkoP9UqOSrIk37vBUMKRy7zhvSyzF0p3fdIMF6KNJ',
-//   });
+var Twitter = require("twitter");
+var client = new Twitter(holder.twitterKeys);
 
-var parameters = {screen_name: "nodejs"};
-client.get("statuses/user_timeline", parameters, function (error, tweets, response) {
-  if (!error) {
-    console.log(tweets);
-  }else {
-  console.log(error);
-  }
-});
+var Spotify = require("node-spotify-api");
+var spotify = new Spotify(holder.spotifyKeys);
 
-console.log("it worked");
+if (user === "my-tweets") {
+  var parameters = {screen_name: "nodejs"};
+  client.get("statuses/home_timeline", parameters, function (error, tweets, response) {
+    if (!error) {
+      console.log(tweets);
+    }else {
+    console.log(error);
+    }
+  });
+} else if (user === "spotify-this-song") {
+	var song = [];
+	for(var i = 3; i < input.length; i++) {
+		song.push(input[i]);
+		//console.log(song);
+	}
+	var name = song.slice(0, song.length - 1).join(" ") + " " + song.slice(-1);
+	//console.log("Your song name is: " + name);
+	spotify.search({ type: 'track',
+					 query: name,
+					 limit: 1}, function(err, data) {
+							  if (err) {
+							    return console.log('Error occurred: ' + err);
+							  }
+							var dataElm = JSON.stringify(data.tracks, null, 2);
+							console.log(dataElm); 
+							});
+}else {
+	console.log("This didnt work!");
+}
